@@ -7,6 +7,13 @@ const database = new Database()
 export const routes = [
   {
     method: 'GET',
+    path: buildRoutePath('/'),
+    handler: (req, res) => {
+      return res.end(JSON.stringify('Hello world!'));
+    }
+  },
+  {
+    method: 'GET',
     path: buildRoutePath('/users'),
     handler: (req, res) => {
       const { search } = req.query;
