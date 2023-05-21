@@ -9,6 +9,7 @@
 ### Decisões:
 - ZOD: Aparentemente, possui uma integração melhor com o typescript que outras bibliotecas (joi e yup, por exemplo)
 - VITEST: É mais simples de instalar (não precisa usar babel e fazer outras configurações para usar da maneira mais adequada). Também é muito mais rápido de executar os testes, pois usa esbuild, um bundler extremamente eficiente e performático.
+  - Para que o vitest entenda os "alias paths" do typescript, é necessário instalar a lib "vite-tsconfig-paths"
 
 ### Comandos úteis:
 * Criação do projeto
