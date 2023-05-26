@@ -15,6 +15,6 @@ jobs:
           cache: 'npm'
           cache-dependency-path: /nodejs/aulas/03-api-solid
 
-      - run: cd nodejs/aulas/03-api-solid
+      - run: cd ./nodejs/aulas/03-api-solid
       - run: npm ci
       - run: npm run test
