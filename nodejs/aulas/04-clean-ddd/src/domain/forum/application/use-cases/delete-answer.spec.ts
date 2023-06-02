@@ -25,8 +25,8 @@ describe('Delete Answer', () => {
     expect(inMemoryAnswersRepository.items).toHaveLength(1)
 
     await sut.execute({
-      authorId: 'author-1',
-      answerId: 'answer-1',
+      authorId: newAnswer.authorId.toString(),
+      answerId: newAnswer.id.toString(),
     })
 
     expect(inMemoryAnswersRepository.items).toHaveLength(0)
@@ -47,7 +47,7 @@ describe('Delete Answer', () => {
     await expect(() => {
       return sut.execute({
         authorId: 'author-2',
-        answerId: 'answer-1',
+        answerId: newAnswer.id.toString(),
       })
     }).rejects.toEqual(
       new Error(
