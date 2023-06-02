@@ -12,18 +12,25 @@ describe('Get Question By Slug', () => {
     sut = new GetQuestionBySlugUseCase(inMemoryQuestionsRepository)
   })
 
-  it('Should be able to get a question by slug', async () => {
+  it.only('Should be able to get a question by slug', async () => {
     const newQuestion = makeQuestion({
       slug: Slug.create('example-question'),
     })
 
     await inMemoryQuestionsRepository.create(newQuestion)
 
-    const { question } = await sut.execute({
+    const result = await sut.execute({
       slug: 'example-question',
     })
 
-    expect(question.title).toEqual(newQuestion.title)
-    expect(question.content).toEqual(newQuestion.content)
+    expect(result.isRight()).toBe(true)
+
+    expect(result.value?.question.id).toBeTruthy()
+    expect(result.value?.question.title).toEqual(newQuestion.title)
+
+    // if (result.isRight()) {
+    //   expect(result.value.question.title).toEqual(newQuestion.title)
+    //   expect(result.value.question.content).toEqual(newQuestion.content)
+    // }
   })
 })

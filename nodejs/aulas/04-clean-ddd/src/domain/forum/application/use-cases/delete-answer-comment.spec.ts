@@ -2,6 +2,7 @@ import { InMemoryAnswerCommentsRepository } from '@/test/repositories/in-memory-
 import { DeleteAnswerCommentUseCase } from './delete-answer-comment'
 import { makeAnswerComment } from '@/test/factories/make-answer-comment'
 import { UniqueEntityId } from '@/core/entities/value-objects/unique-entity-id'
+import { NotAllowedError } from './errors/not-allowed-error'
 
 let inMemoryAnswerCommentsRepository: InMemoryAnswerCommentsRepository
 let sut: DeleteAnswerCommentUseCase
@@ -19,11 +20,12 @@ describe('Delete Answer Comment', () => {
     await inMemoryAnswerCommentsRepository.create(answerComment)
     expect(inMemoryAnswerCommentsRepository.items).toHaveLength(1)
 
-    await sut.execute({
+    const result = await sut.execute({
       authorId: answerComment.authorId.toString(),
       answerCommentId: answerComment.id.toString(),
     })
 
+    expect(result.isRight()).toBe(true)
     expect(inMemoryAnswerCommentsRepository.items).toHaveLength(0)
   })
 
@@ -35,15 +37,12 @@ describe('Delete Answer Comment', () => {
     await inMemoryAnswerCommentsRepository.create(answerComment)
     expect(inMemoryAnswerCommentsRepository.items).toHaveLength(1)
 
-    await expect(() => {
-      return sut.execute({
-        authorId: 'author-2',
-        answerCommentId: answerComment.id.toString(),
-      })
-    }).rejects.toEqual(
-      new Error(
-        "Not allowed! User doesn't have permission to delete this answer comment",
-      ),
-    )
+    const result = await sut.execute({
+      authorId: 'author-2',
+      answerCommentId: answerComment.id.toString(),
+    })
+
+    expect(result.isLeft()).toBe(true)
+    expect(result.value).toBeInstanceOf(NotAllowedError)
   })
 })

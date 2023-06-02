@@ -2,6 +2,7 @@ import { InMemoryAnswersRepository } from '@/test/repositories/in-memory-answers
 import { EditAnswerUseCase } from './edit-answer'
 import { makeAnswer } from '@/test/factories/make-answer'
 import { UniqueEntityId } from '@/core/entities/value-objects/unique-entity-id'
+import { NotAllowedError } from './errors/not-allowed-error'
 
 let inMemoryAnswersRepository: InMemoryAnswersRepository
 let sut: EditAnswerUseCase
@@ -24,12 +25,13 @@ describe('Edit Answer', () => {
 
     expect(inMemoryAnswersRepository.items).toHaveLength(1)
 
-    await sut.execute({
+    const result = await sut.execute({
       authorId: newAnswer.authorId.toString(),
       answerId: newAnswer.id.toString(),
       content: 'Conteudo teste',
     })
 
+    expect(result.isRight()).toBe(true)
     expect(inMemoryAnswersRepository.items[0]).toMatchObject({
       content: 'Conteudo teste',
     })
@@ -47,16 +49,13 @@ describe('Edit Answer', () => {
 
     expect(inMemoryAnswersRepository.items).toHaveLength(1)
 
-    await expect(() => {
-      return sut.execute({
-        authorId: 'author-2',
-        answerId: newAnswer.id.toString(),
-        content: 'Conteudo teste',
-      })
-    }).rejects.toEqual(
-      new Error(
-        "Not allowed! User doesn't have permission to edit this answer",
-      ),
-    )
+    const result = await sut.execute({
+      authorId: 'author-2',
+      answerId: newAnswer.id.toString(),
+      content: 'Conteudo teste',
+    })
+
+    expect(result.isLeft()).toBe(true)
+    expect(result.value).toBeInstanceOf(NotAllowedError)
   })
 })

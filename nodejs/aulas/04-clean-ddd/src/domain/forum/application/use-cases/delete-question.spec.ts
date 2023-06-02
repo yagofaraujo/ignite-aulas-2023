@@ -2,6 +2,7 @@ import { InMemoryQuestionsRepository } from '@/test/repositories/in-memory-quest
 import { DeleteQuestionUseCase } from './delete-question'
 import { makeQuestion } from '@/test/factories/make-question'
 import { UniqueEntityId } from '@/core/entities/value-objects/unique-entity-id'
+import { NotAllowedError } from './errors/not-allowed-error'
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository
 let sut: DeleteQuestionUseCase
@@ -24,11 +25,12 @@ describe('Delete Question', () => {
 
     expect(inMemoryQuestionsRepository.items).toHaveLength(1)
 
-    await sut.execute({
+    const result = await sut.execute({
       authorId: newQuestion.authorId.toString(),
       questionId: newQuestion.id.toString(),
     })
 
+    expect(result.isRight()).toBe(true)
     expect(inMemoryQuestionsRepository.items).toHaveLength(0)
   })
 
@@ -44,15 +46,12 @@ describe('Delete Question', () => {
 
     expect(inMemoryQuestionsRepository.items).toHaveLength(1)
 
-    await expect(() => {
-      return sut.execute({
-        authorId: 'author-2',
-        questionId: newQuestion.id.toString(),
-      })
-    }).rejects.toEqual(
-      new Error(
-        "Not allowed! User doesn't have permission to delete this question",
-      ),
-    )
+    const result = await sut.execute({
+      authorId: 'author-2',
+      questionId: newQuestion.id.toString(),
+    })
+
+    expect(result.isLeft()).toBe(true)
+    expect(result.value).toBeInstanceOf(NotAllowedError)
   })
 })

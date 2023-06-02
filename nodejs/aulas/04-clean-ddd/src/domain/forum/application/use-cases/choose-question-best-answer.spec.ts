@@ -4,6 +4,7 @@ import { UniqueEntityId } from '@/core/entities/value-objects/unique-entity-id'
 import { InMemoryAnswersRepository } from '@/test/repositories/in-memory-answers-repository'
 import { ChooseQuestionBestAnswerUseCase } from './choose-question-best-answer'
 import { makeAnswer } from '@/test/factories/make-answer'
+import { NotAllowedError } from './errors/not-allowed-error'
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository
 let inMemoryAnswersRepository: InMemoryAnswersRepository
@@ -30,11 +31,12 @@ describe('Choose Question Best Answer', () => {
 
     expect(inMemoryQuestionsRepository.items).toHaveLength(1)
 
-    await sut.execute({
+    const result = await sut.execute({
       answerId: answer.id.toString(),
       questionAuthorId: question.authorId.toString(),
     })
 
+    expect(result.isRight()).toBe(true)
     expect(inMemoryQuestionsRepository.items[0].bestAnswerId).toEqual(answer.id)
   })
 
@@ -52,15 +54,12 @@ describe('Choose Question Best Answer', () => {
 
     expect(inMemoryQuestionsRepository.items).toHaveLength(1)
 
-    await expect(() => {
-      return sut.execute({
-        answerId: answer.id.toString(),
-        questionAuthorId: 'author-2',
-      })
-    }).rejects.toEqual(
-      new Error(
-        "Not allowed! User doesn't have permission to choose best answer",
-      ),
-    )
+    const result = await sut.execute({
+      answerId: answer.id.toString(),
+      questionAuthorId: 'author-2',
+    })
+
+    expect(result.isLeft()).toBe(true)
+    expect(result.value).toBeInstanceOf(NotAllowedError)
   })
 })
