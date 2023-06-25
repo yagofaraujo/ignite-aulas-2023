@@ -1,15 +1,23 @@
-import { InMemoryQuestionsRepository } from '@/test/repositories/in-memory-questions-repository copy'
+import { InMemoryQuestionsRepository } from '@/test/repositories/in-memory-questions-repository'
 import { DeleteQuestionUseCase } from './delete-question'
 import { makeQuestion } from '@/test/factories/make-question'
 import { UniqueEntityId } from '@/core/entities/value-objects/unique-entity-id'
 import { NotAllowedError } from './errors/not-allowed-error'
+import { InMemoryQuestionAttachmentsRepository } from '@/test/repositories/in-memory-question-attachments-repository'
+import { makeQuestionAttachment } from '@/test/factories/make-question-attachment'
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository
+let inMemoryQuestionAttachmentsRepository: InMemoryQuestionAttachmentsRepository
 let sut: DeleteQuestionUseCase
 
 describe('Delete Question', () => {
   beforeEach(() => {
-    inMemoryQuestionsRepository = new InMemoryQuestionsRepository()
+    inMemoryQuestionAttachmentsRepository =
+      new InMemoryQuestionAttachmentsRepository()
+    inMemoryQuestionsRepository = new InMemoryQuestionsRepository(
+      inMemoryQuestionAttachmentsRepository,
+    )
+
     sut = new DeleteQuestionUseCase(inMemoryQuestionsRepository)
   })
 
@@ -25,6 +33,17 @@ describe('Delete Question', () => {
 
     expect(inMemoryQuestionsRepository.items).toHaveLength(1)
 
+    inMemoryQuestionAttachmentsRepository.items.push(
+      makeQuestionAttachment({
+        questionId: newQuestion.id,
+        attachmentId: new UniqueEntityId('1'),
+      }),
+      makeQuestionAttachment({
+        questionId: newQuestion.id,
+        attachmentId: new UniqueEntityId('2'),
+      }),
+    )
+
     const result = await sut.execute({
       authorId: newQuestion.authorId.toString(),
       questionId: newQuestion.id.toString(),
@@ -32,6 +51,7 @@ describe('Delete Question', () => {
 
     expect(result.isRight()).toBe(true)
     expect(inMemoryQuestionsRepository.items).toHaveLength(0)
+    expect(inMemoryQuestionAttachmentsRepository.items).toHaveLength(0)
   })
 
   it('Should not be able to delete a question from another user', async () => {
