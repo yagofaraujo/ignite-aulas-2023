@@ -113,6 +113,10 @@
   transition: background-color 0.1s;
 }
 
-.commentForm > button:hover {
+.commentForm button[type=submit]:hover {
   background: var(--green-300);
+}
+
+.commentList {
+  margin-top: 2rem;
 }
