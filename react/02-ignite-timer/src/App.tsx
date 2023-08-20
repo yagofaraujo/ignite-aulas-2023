@@ -1,7 +1,7 @@
-import { ThemeProvider } from 'styled-components'
-import { GlobalStyle } from './styles/global'
-import { defaultTheme } from './styles/themes/default'
-import { Button } from './components/Button'
+import { ThemeProvider } from 'styled-components';
+import { GlobalStyle } from './styles/global';
+import { defaultTheme } from './styles/themes/default';
+import { Button } from './components/Button';
 
 export function App() {
   return (
@@ -12,5 +12,5 @@ export function App() {
       <Button variant="success" />
       <GlobalStyle />
     </ThemeProvider>
-  )
+  );
 }
